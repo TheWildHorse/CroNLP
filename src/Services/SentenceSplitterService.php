@@ -2,37 +2,39 @@
 namespace IgorRinkovec\CroNLP\Services;
 
 /**
- * Segments sentences.
- * Clipping may not be perfect.
- * Sentence count should be VERY close to the truth.
- *
- * Multibyte safe (atleast for UTF-8), but rules based on germanic
- * language stucture (English, Dutch, German). Should work for most
- * latin-alphabet languages.
+ * Class SentenceSplitterService
+ * @package IgorRinkovec\CroNLP\Services
  */
-class SentenceSplitterService {
+class SentenceSplitterService
+{
+
     /**
      * Specify this flag with the split method to trim whitespace.
      */
-    const SPLIT_TRIM		= 0x1;
+    const SPLIT_TRIM = 0x1;
+
     /**
      * List of characters used to terminate sentences.
      * @var array
      */
-    private $terminals		= array('.', '!', '?');
+    private $terminals = array('.', '!', '?');
+
     /**
      * List of characters used for abbreviations.
      * @var array
      */
-    private $abbreviators	= array('.');
+    private $abbreviators = array('.');
+
     /**
      * Multibyte safe version of standard trim() function.
      * @param string $string
      * @return string
      */
-    private static function mbTrim($string) {
+    private static function mbTrim($string)
+    {
         return mb_ereg_replace('^\s*([\s\S]*?)\s*$', '\1', $string);
     }
+
     /**
      * A cross between mb_split and preg_split, adding the preg_split flags
      * to mb_split.
@@ -42,8 +44,9 @@ class SentenceSplitterService {
      * @param int $flags
      * @return array
      */
-    private static function mbSplit($pattern, $string, $limit = -1, $flags = 0) {
-        $strlen = strlen($string);		// bytes!
+    private static function mbSplit($pattern, $string, $limit = -1, $flags = 0)
+    {
+        $strlen = strlen($string);  // bytes!
         mb_ereg_search_init($string);
 
         $lengths = array();
@@ -64,28 +67,25 @@ class SentenceSplitterService {
                 break;
             }
         }
+
         // Add last bit, if not ending with split
         $lengths[] = array($strlen - $position, false, null);
+
         // Substrings
         $parts = array();
         $position = 0;
         $count = 1;
         foreach ($lengths as $length) {
-            $is_delimiter	= $length[1];
-            $is_captured	= $length[2];
+            $is_delimiter = $length[1];
+            $is_captured = $length[2];
 
             if ($limit > 0 && !$is_delimiter && ($length[0] || ~$flags & PREG_SPLIT_NO_EMPTY) && ++$count > $limit) {
                 if ($length[0] > 0 || ~$flags & PREG_SPLIT_NO_EMPTY) {
-                    $parts[]	= $flags & PREG_SPLIT_OFFSET_CAPTURE
-                        ? array(mb_strcut($string, $position), $position)
-                        : mb_strcut($string, $position);
+                    $parts[] = $flags & PREG_SPLIT_OFFSET_CAPTURE ? array(mb_strcut($string, $position), $position) : mb_strcut($string, $position);
                 }
                 break;
-            } elseif ((!$is_delimiter || ($flags & PREG_SPLIT_DELIM_CAPTURE && $is_captured))
-                && ($length[0] || ~$flags & PREG_SPLIT_NO_EMPTY)) {
-                $parts[]	= $flags & PREG_SPLIT_OFFSET_CAPTURE
-                    ? array(mb_strcut($string, $position, $length[0]), $position)
-                    : mb_strcut($string, $position, $length[0]);
+            } elseif ((!$is_delimiter || ($flags & PREG_SPLIT_DELIM_CAPTURE && $is_captured)) && ($length[0] || ~$flags & PREG_SPLIT_NO_EMPTY)) {
+                $parts[] = $flags & PREG_SPLIT_OFFSET_CAPTURE ? array(mb_strcut($string, $position, $length[0]), $position) : mb_strcut($string, $position, $length[0]);
             }
 
             $position += $length[0];
@@ -103,7 +103,8 @@ class SentenceSplitterService {
      * @param string $text
      * @return array
      */
-    private static function linebreakSplit($text) {
+    private static function linebreakSplit($text)
+    {
         $lines = array();
         $line = '';
 
@@ -118,6 +119,7 @@ class SentenceSplitterService {
 
         return $lines;
     }
+
     /**
      * Splits an array of lines by (consecutive sequences of)
      * terminals, keeping terminals.
@@ -125,16 +127,18 @@ class SentenceSplitterService {
      * Multibyte safe (atleast for UTF-8)
      *
      * For example:
-     *	"There ... is. More!"
-     *		... becomes ...
-     *	[ "There ", "...", " is", ".", " More", "!" ]
+     * 	"There ... is. More!"
+     * 		... becomes ...
+     * 	[ "There ", "...", " is", ".", " More", "!" ]
      *
      * @param array $lines
      * @return array
      */
-    private function punctuationSplit($line) {
+    private function punctuationSplit($line)
+    {
         $parts = array();
-        $chars = preg_split('//u', $line, -1, PREG_SPLIT_NO_EMPTY);	// This is UTF8 multibyte safe!
+
+        $chars = preg_split('//u', $line, -1, PREG_SPLIT_NO_EMPTY); // This is UTF8 multibyte safe!
         $is_terminal = in_array($chars[0], $this->terminals);
 
         $part = '';
@@ -150,8 +154,10 @@ class SentenceSplitterService {
         if (!empty($part)) {
             $parts[] = $part;
         }
+
         return $parts;
     }
+
     /**
      * Appends each terminal item after it's preceding
      * non-terminals.
@@ -159,18 +165,20 @@ class SentenceSplitterService {
      * Multibyte safe (atleast for UTF-8)
      *
      * For example:
-     *	[ "There ", "...", " is", ".", " More", "!" ]
-     *		... becomes ...
-     *	[ "There ... is.", "More!" ]
+     * 	[ "There ", "...", " is", ".", " More", "!" ]
+     * 		... becomes ...
+     * 	[ "There ... is.", "More!" ]
      *
      * @param array $punctuations
      * @return array
      */
-    private function punctuationMerge($punctuations) {
+    private function punctuationMerge($punctuations)
+    {
         $definite_terminals = array_diff($this->terminals, $this->abbreviators);
 
         $merges = array();
         $merge = '';
+
         foreach ($punctuations as $punctuation) {
             if ($punctuation !== '') {
                 $merge.= $punctuation;
@@ -191,22 +199,25 @@ class SentenceSplitterService {
         if (!empty($merge)) {
             $merges[] = $merge;
         }
+
         return $merges;
     }
+
     /**
      * Merges any one-word items with it's preceding items.
      *
      * Multibyte safe
      *
      * For example:
-     *	[ "There ... is.", "More!" ]
-     *		... becomes ...
-     *	[ "There ... is. More!" ]
+     * 	[ "There ... is.", "More!" ]
+     * 		... becomes ...
+     * 	[ "There ... is. More!" ]
      *
      * @param array $fragments
      * @return array
      */
-    private function abbreviationMerge($fragments) {
+    private function abbreviationMerge($fragments)
+    {
         $non_abbreviating_terminals = array_diff($this->terminals, $this->abbreviators);
 
         $abbreviations = array();
@@ -224,15 +235,38 @@ class SentenceSplitterService {
                 $abbreviations[] = $abbreviation;
                 $abbreviation = '';
             }
-            $abbreviation			.= $fragment;
-            $previous_word_count	= $word_count;
-            $previous_word_ending	= mb_substr($fragment, -1);
+
+            $abbreviation .= $fragment;
+            $previous_word_count = $word_count;
+            $previous_word_ending = mb_substr($fragment, -1);
         }
         if ($abbreviation !== '') {
             $abbreviations[] = $abbreviation;
         }
+
         return $abbreviations;
     }
+
+    /**
+     * Merges any part starting with a closing parenthesis ')' to the previous
+     * part.
+     * @param type $parts
+     */
+    private function parenthesesMerge($parts)
+    {
+        $subsentences = array();
+
+        foreach ($parts as $part) {
+            if ($part[0] === ')') {
+                $subsentences[count($subsentences) - 1] .= $part;
+            } else {
+                $subsentences[] = $part;
+            }
+        }
+
+        return $subsentences;
+    }
+
     /**
      * Merges items into larger sentences.
      *
@@ -241,9 +275,12 @@ class SentenceSplitterService {
      * @param array $shorts
      * @return array
      */
-    private function sentenceMerge($shorts) {
+    private function sentenceMerge($shorts)
+    {
         $non_abbreviating_terminals = array_diff($this->terminals, $this->abbreviators);
+
         $sentences = array();
+
         $sentence = '';
         $has_words = false;
         $previous_word_ending = null;
@@ -265,24 +302,7 @@ class SentenceSplitterService {
         if (!empty($sentence)) {
             $sentences[] = $sentence;
         }
-        return $sentences;
-    }
 
-    /**
-     * Combines sentences that were split but the next one does not start
-     * with a capital letter.
-     * @param $sentences
-     * @return mixed
-     */
-    private function mergeCutSentences($sentences) {
-        foreach ($sentences as $key => &$sentence) {
-            if(end($sentences) != $sentence) {
-                if(self::startsWithUpper($sentences[$key+1]) == false) {
-                    $sentence .= ' ' . $sentences[$key+1];
-                    unset($sentences[$key+1]);
-                }
-            }
-        }
         return $sentences;
     }
 
@@ -293,16 +313,18 @@ class SentenceSplitterService {
      * @param integer $flags
      * @return array
      */
-    public function split($text, $flags = 0) {
+    public function split($text, $flags = 0)
+    {
         $sentences = array();
+
         // Split
         foreach (self::linebreakSplit($text) as $line) {
             if (self::mbTrim($line) !== '') {
-                $punctuations	= $this->punctuationSplit($line);
-                $merges			= $this->punctuationMerge($punctuations);
-                $shorts			= $this->abbreviationMerge($merges);
-                $sentences		= array_merge($sentences, $this->sentenceMerge($shorts));
-                $sentences = $this->mergeCutSentences($sentences);
+                $punctuations = $this->punctuationSplit($line);
+                $parentheses = $this->parenthesesMerge($punctuations); // also works after punctuationMerge or abbreviationMerge
+                $merges = $this->punctuationMerge($parentheses);
+                $shorts = $this->abbreviationMerge($merges);
+                $sentences = array_merge($sentences, $this->sentenceMerge($shorts));
             }
         }
 
@@ -313,17 +335,8 @@ class SentenceSplitterService {
             }
             unset($sentence);
         }
-        return $sentences;
-    }
 
-    /**
-     * Checks if a string starts with an uppercase
-     * @param $str
-     * @return bool
-     */
-    public static function startsWithUpper($str) {
-        $chr = mb_substr ($str, 0, 1, "UTF-8");
-        return mb_strtolower($chr, "UTF-8") != $chr;
+        return $sentences;
     }
 
     /**
@@ -331,7 +344,9 @@ class SentenceSplitterService {
      * @param string $text
      * @return integer
      */
-    public function count($text) {
+    public function count($text)
+    {
         return count($this->split($text));
     }
+
 }
