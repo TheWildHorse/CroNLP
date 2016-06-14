@@ -1,0 +1,21 @@
+{
+  "name": "TheWildHorse/CroNLP",
+  "description": "A package for extracting metadata from Croatian text.",
+  "license": "MIT",
+  "keywords": ["croatian", "cronlp", "summary", "keyword extraction"],
+  "authors": [
+    {
+      "name": "Igor Rinkovec",
+      "email": "igor.rinkovec@gmail.com"
+    }
+  ],
+  "require": {},
+  "require-dev": {
+    "phpunit/phpunit": "5.4.*"
+  },
+  "autoload": {
+    "psr-4": {
+      "IgorRinkovec\\CroNLP\\": "src"
+    }
+  }
+}
