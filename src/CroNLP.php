@@ -13,12 +13,38 @@ class CroNLP
     protected $datasetAdapter = null;
 
     /**
+     * Stores the TextProcessorService object with the processed text.
+     * @var TextProcessorService
+     */
+    protected $textProcessorService = null;
+
+    /**
+     * Contains the MD5 hash of the currently processed text.
+     * @var string
+     */
+    protected $currentlyProcessedTextHash = null;
+
+    /**
      * CroNLP constructor.
      * @param AbstractDatasetAdapter $adapter
      */
     public function __construct(AbstractDatasetAdapter $adapter)
     {
         $this->datasetAdapter = $adapter;
+    }
+
+    /**
+     * Processes the given text to prepare it for fetching metadata unless
+     * the metadata for the given text is already calculated.
+     * @param $text
+     */
+    protected function processText($text)
+    {
+        if($this->currentlyProcessedTextHash !== md5($text)) {
+            $this->currentlyProcessedTextHash = md5($text);
+            $this->textProcessorService = new TextProcessorService($this->datasetAdapter);
+            $this->textProcessorService->processContent($text);
+        }
     }
 
     /**
@@ -29,9 +55,8 @@ class CroNLP
      */
     public function extractKeywords($text, $amount = 10)
     {
-        $tps = new TextProcessorService($this->datasetAdapter);
-        $tps->processContent($text);
-        return $tps->getKeywords($amount);
+        $this->processText($text);
+        return $this->textProcessorService->getKeywords($amount);
     }
 
     /**
@@ -42,9 +67,8 @@ class CroNLP
      */
     public function summarize($text, $percentageToCondense = 70)
     {
-        $tps = new TextProcessorService($this->datasetAdapter);
-        $tps->processContent($text);
-        return $tps->getContentDigest($percentageToCondense);
+        $this->processText($text);
+        return $this->textProcessorService->getContentDigest($percentageToCondense);
     }
 
 }
