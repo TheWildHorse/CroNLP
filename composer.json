@@ -1,5 +1,5 @@
 {
-  "name": "TheWildHorse/CroNLP",
+  "name": "thewildhorse/cronlp",
   "description": "A package for extracting metadata from Croatian text.",
   "license": "MIT",
   "keywords": ["croatian", "cronlp", "summary", "keyword extraction"],
