@@ -33,6 +33,6 @@ class TfidfService
     public function getInverseDocumentFrequency($wordForm)
     {
         $frequency = $this->datasetAdapter->getWordFrequency($wordForm);
-        return log(self::DOCUMENT_COUNT / $frequency);
+        return log($this->datasetAdapter->getExaminedDocumentCount() / $frequency);
     }
 }

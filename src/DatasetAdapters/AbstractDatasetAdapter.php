@@ -15,7 +15,7 @@ abstract class AbstractDatasetAdapter
      * Check the README for that number in the provided dataset.
      * @return integer
      */
-    abstract static function getExaminedDocumentCount();
+    abstract function getExaminedDocumentCount();
 
     /**
      * When given the word in any form it returns its lemma.
@@ -25,7 +25,7 @@ abstract class AbstractDatasetAdapter
      * @param $wordForm
      * @return string
      */
-    abstract static function getLemmaFromForm($wordForm);
+    abstract function getLemmaFromForm($wordForm);
 
     /**
      * Returns the number of times this word has appeared
@@ -36,5 +36,5 @@ abstract class AbstractDatasetAdapter
      * @param $word
      * @return integer
      */
-    abstract static function getWordFrequency($word);
+    abstract function getWordFrequency($word);
 }

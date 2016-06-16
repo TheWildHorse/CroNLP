@@ -1,15 +1,36 @@
 <?php
 namespace IgorRinkovec\CroNLP\DatasetAdapters;
 
-use App\WordFrequency;
-use App\WordVariation;
-
 /**
  * Class EloquentDatasetAdapter
  * @package IgorRinkovec\CroNLP\DatasetAdapters
  */
 class EloquentDatasetAdapter extends AbstractDatasetAdapter
 {
+
+    /**
+     * Stores the eloquent model for the word_variation dataset.
+     * @var
+     */
+    protected $WordVariation;
+
+    /**
+     * Stores the eloquent model for the word_variation dataset.
+     * @var
+     */
+    protected $WordFrequency;
+
+    /**
+     * EloquentDatasetAdapter constructor.
+     * @param $WordVariationModel
+     * @param $WordFrequencyModel
+     */
+    public function __construct($WordVariationModel, $WordFrequencyModel)
+    {
+        $this->WordVariation = new $WordVariationModel();
+        $this->WordFrequency = new $WordFrequencyModel();
+    }
+
     /**
      * Returns the amount of documents examined in the creation
      * of the dataset.
@@ -17,7 +38,7 @@ class EloquentDatasetAdapter extends AbstractDatasetAdapter
      * Check the README for that number in the provided dataset.
      * @return integer
      */
-    static function getExaminedDocumentCount()
+    function getExaminedDocumentCount()
     {
         return 706134;
     }
@@ -30,10 +51,10 @@ class EloquentDatasetAdapter extends AbstractDatasetAdapter
      * @param $wordForm
      * @return string
      */
-    static function getLemmaFromForm($wordForm)
+    function getLemmaFromForm($wordForm)
     {
         $word = mb_strtolower($wordForm);
-        $variation = WordVariation::where('variation', $word)->first();
+        $variation = $this->WordVariation->where('variation', $word)->first();
         if($variation === NULL) {
             return $word;
         }
@@ -49,10 +70,10 @@ class EloquentDatasetAdapter extends AbstractDatasetAdapter
      * @param $word
      * @return integer
      */
-    static function getWordFrequency($word)
+    function getWordFrequency($word)
     {
-        $lemma = self::getLemmaFromForm($word);
-        $entry = WordFrequency::where('word', $lemma)->first();
+        $lemma = $this->getLemmaFromForm($word);
+        $entry = $this->WordFrequency->where('word', $lemma)->first();
         if($entry === NULL) {
             return 1;
         }

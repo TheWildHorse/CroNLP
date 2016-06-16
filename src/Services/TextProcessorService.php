@@ -116,7 +116,7 @@ class TextProcessorService {
         $occurenceCountByNormalizedWord = [];
 
         foreach($wordArray as $word) {
-            $normalized = $this-$this->datasetAdapter->getLemmaFromForm($word);
+            $normalized = $this->datasetAdapter->getLemmaFromForm($word);
             $originalToNormalizedMap[$word] = $normalized;
             if(isset($occurenceCountByNormalizedWord[$normalized])) {
                 $occurenceCountByNormalizedWord[$normalized]++;
