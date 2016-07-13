@@ -134,11 +134,11 @@ class SentenceSplitterService
      * @param array $lines
      * @return array
      */
-    private function punctuationSplit($line)
+    private function punctuationSplit($lines)
     {
         $parts = array();
 
-        $chars = preg_split('//u', $line, -1, PREG_SPLIT_NO_EMPTY); // This is UTF8 multibyte safe!
+        $chars = preg_split('//u', $lines, -1, PREG_SPLIT_NO_EMPTY); // This is UTF8 multibyte safe!
         $is_terminal = in_array($chars[0], $this->terminals);
 
         $part = '';
@@ -251,6 +251,7 @@ class SentenceSplitterService
      * Merges any part starting with a closing parenthesis ')' to the previous
      * part.
      * @param type $parts
+     * @return array
      */
     private function parenthesesMerge($parts)
     {
