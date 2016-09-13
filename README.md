@@ -8,7 +8,7 @@ CroNLP is a package used for extracting metadata from Croatian text. Currently i
 
 &#x1F535; *This package is stable, but the algorithm may produce subpar results since it is still in development stages. Feel free to submit a merge request if you can improve upon any part ot the package. :)* &#x1F535;
 
-[Test application to check the algorithm results.](http://188.226.244.156/)
+[Test application to check the algorithm results.](http://crodigest.rinkovec.com/)
 
 ## Installation
 Installation is a two step process, and it does involve a bit of implementation on your side, but nothing complex.
